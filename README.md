@@ -16,6 +16,11 @@ Connection:Disconnect();
 ```lua
 Signal:Fire("Message")
 ```
+## SafeFire
+Waits until a connection is established before firing
+```lua
+Signal:SafeFire("Message")
+```
 ## Destroy
 ```lua
 Signal:Destroy()
@@ -30,6 +35,6 @@ Removes all current connections
 
 ### Wally
 ```
-simplesignal = "prophetouw/simplesignal@1.0.12"
+simplesignal = "prophetouw/simplesignal@1.0.13"
 ```
 ### Github
