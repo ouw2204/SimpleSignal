@@ -1,7 +1,7 @@
 local mt = {}
 mt.__index = mt;
 local tins,tr,tf = table.insert,table.remove,table.find
-local disconnectmt = {};
+local disconnectmt = {__simplesignalconnection = true};
 disconnectmt.__index = disconnectmt;
 function disconnectmt:Disconnect()
     if self.signal ~= nil then
@@ -11,13 +11,21 @@ function disconnectmt:Disconnect()
         end
         f = nil;
     end
+    if self.lists ~= nil then
+        local find = tf(self.lists,self);
+        if find ~= nil then
+            tr(self.lists,find);
+        end
+        self.lists = nil;
+    end
+    self.__simplesignalconnection = nil;
     self.func = nil;
     self.signal = nil;
     setmetatable(self,nil);
 end
 disconnectmt.Destroy = disconnectmt.Disconnect
 --Connect
-function mt:Connect(func: () -> ())
+function mt:Connect(func: () -> (),RemoveFromTableOnDisconnect: {[any]: any}?)
     if self.Destroying == true then return end;
     local t = setmetatable({func = func,signal = self},disconnectmt)
     tins(self,t)
@@ -29,6 +37,12 @@ function mt:Connect(func: () -> ())
         end
         table.clear(self.Queu)
         self.Queu = nil;
+    end
+    if RemoveFromTableOnDisconnect ~= nil then
+        if t.lists == nil then
+            t.lists = RemoveFromTableOnDisconnect;
+        end
+        
     end
     return t;
 end
@@ -114,7 +128,7 @@ export type Connection = {
 export type Signal = {
     Fire: (self: Signal, ...any) -> (),
     SafeFire: (self: Signal, ...any) -> ();
-    Connect: (self: Signal, func: () -> ()) -> Connection,
+    Connect: (self: Signal, func: () -> (),RemoveFromTableOnDisconnect: {[any]: any}?) -> Connection,
     Once: (self: Signal, func: () -> ()) -> Connection,
     DisconnectAll: (self: Signal) -> (),
     Destroy: (self: Signal) -> (),
