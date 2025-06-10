@@ -34,6 +34,6 @@ Removes all current connections
 
 ### Wally
 ```
-simplesignal = "prophetouw/simplesignal@1.0.14"
+SimpleSignal = "prophetouw/simplesignal@1.0.14"
 ```
 ### Github
