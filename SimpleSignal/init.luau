@@ -1,8 +1,16 @@
 local mt = {}
 mt.__index = mt;
+local st = "Simple Signal"
+mt.__tostring = function()
+    return st
+end
 local tins,tr,tf = table.insert,table.remove,table.find
 local disconnectmt = {__simplesignalconnection = true};
 disconnectmt.__index = disconnectmt;
+local st2 = "Simple Signal Connection"
+disconnectmt.__tostring = function()
+    return st2
+end
 function disconnectmt:Disconnect()
     if self.signal ~= nil then
         local f = tf(self.signal,self);
@@ -69,25 +77,42 @@ function mt:DisconnectAll()
 end
  
 --Firing signal
+local disconnectxt = "Disconnect";
 function mt:Fire(...)
     for i = #self,1,-1 do
         local v = self[i];
         if v == nil then continue end;
         task.spawn(v.func,...)
-        if v.Once == true then
+        if v.Once == true and v[disconnectxt] ~= nil then
             v:Disconnect();
         end
     end
 end
-function mt:SafeFire(...)
-    if #self >0 then
-        self:Fire(...)
-    else
-        if self.Queu == nil then
-            self.Queu = {}
+-- no task.spawn
+function mt:BasicFire(...)
+    for i = #self, 1, -1 do
+        local v = self[i]
+        if v == nil then
+            continue
         end
-        table.insert(self.Queu,{...})
+        v.func(...)
+        if v.Once == true and v.Disconnect then
+            v:Disconnect()
+        end
     end
+end
+--queus and waits for connections
+function mt:SafeFire(...)
+    task.defer(function(...)
+        if #self >0 then
+            self:BasicFire(...)
+        else
+            if self.Queu == nil then
+                self.Queu = {}
+            end
+            table.insert(self.Queu,{...})
+        end
+    end,...)
 end
 
 function mt:Wait(timeout: number)
@@ -127,9 +152,10 @@ export type Connection = {
 }
 export type Signal = {
     Fire: (self: Signal, ...any) -> (),
+    BasicFire: (self: Signal, ...any) -> (),
     SafeFire: (self: Signal, ...any) -> ();
-    Connect: (self: Signal, func: () -> (),RemoveFromTableOnDisconnect: {[any]: any}?) -> Connection,
-    Once: (self: Signal, func: () -> ()) -> Connection,
+    Connect: (self: Signal, func: (...any) -> (),RemoveFromTableOnDisconnect: {[any]: any}?) -> Connection,
+    Once: (self: Signal, func: (...any) -> ()) -> Connection,
     DisconnectAll: (self: Signal) -> (),
     Destroy: (self: Signal) -> (),
     Wait: (self: Signal, timeout: number) -> any
