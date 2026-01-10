@@ -29,7 +29,6 @@ function disconnectmt:Disconnect()
     self.__simplesignalconnection = nil;
     self.func = nil;
     self.signal = nil;
-    setmetatable(self,nil);
 end
 disconnectmt.Destroy = disconnectmt.Disconnect
 --Connect
@@ -65,7 +64,6 @@ function mt:Destroy()
     if self.Destroying then return end;
     self.Destroying = true;
     self:DisconnectAll();
-    setmetatable(self,nil);
     self.Destroying = nil;
 end
 function mt:DisconnectAll()
