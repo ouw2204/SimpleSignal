@@ -117,8 +117,8 @@ function mt:Fire(...)
         local er,m = cr(cur,v.func,...)
        
         if not er then
+            task.spawn(caller,`'{m}'\n{debug.traceback(cur)}`)
             cur = nil;
-            task.spawn(caller,`{m} {debug.traceback()}`)
         end
         i -=increment
     end
