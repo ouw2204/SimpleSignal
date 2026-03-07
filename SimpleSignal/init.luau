@@ -118,7 +118,7 @@ function mt:Fire(...)
        
         if not er then
             cur = nil;
-            task.spawn(caller,`Simple Signal Errored while firing: {m} - {debug.traceback()}`)
+            task.spawn(caller,`{m} {debug.traceback()}`)
         end
         i -=increment
     end
